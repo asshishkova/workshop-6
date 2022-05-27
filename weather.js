@@ -9,27 +9,31 @@
 // 8. BONUS - Implement the second command.
 
 // Commander usage example for your reference:
-import chalk from "chalk";
 import { Command } from "commander";
-const program = new Command();
+import { myLogger } from "mondayu-logger-assh";
+import { AsyncWeather } from "@cicciosgamino/openweather-apis";
+import 'dotenv/config';
+// dotenv.config();
+const apiKey = process.env.WEATHER_API_KEY;
+const weatherInitializer = new AsyncWeather();
+const weatherAPI = await weatherInitializer;
+weatherAPI.setApiKey(apiKey);
 
+const program = new Command();
 program
-  .name("cli-calc")
-  .description("The best CLI calculator")
+  .name("weather")
+  .description("show the weather")
   .version("1.0.0");
 
 program
-  .command("add")
-  .description("Add two numbers")
-  .argument("<number>", "first operand")
-  .argument("<number>", "second operand")
+  .command("get-temp")
+  .description("Type the city")
+  .argument("<string>", "city")
   .option("-c, --color <string>", "Result color", "white")
-  .action((firstNumber, secondNumber, options) => {
-    console.log(
-      chalk[options.color](
-        `Result: ${Number(firstNumber) + Number(secondNumber)}`
-      )
-    );
+  .action(async (city) => {
+    weatherAPI.setCity(city);
+    const temp = await weatherAPI.getTemperature();
+    myLogger.log(`It's ${temp} degrees in ${city}`);
   });
 
 program.parse();
